@@ -1,52 +1,53 @@
-// Login page rendering on page reloading
+// Add event listener for when the DOM content is fully loaded
 document.addEventListener("DOMContentLoaded", function () {
   const main = document.querySelector(".main");
 
-  let isLoggedIn = false;
+  let isLoggedIn = false; // Initial login status
 
-  // login page html structure
+  // Function to render the login form
   function renderLoginForm() {
     main.innerHTML = `
-        <section>
-          <div class="login-container">
-            <h2>Login</h2>
-            <form id="loginForm">
-              <div class="input-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-              </div>
-              <div class="input-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-              </div>
-              <button type="submit">Login</button>
-            </form>
-            <div id="loginMessage"></div>
-          </div>
-        </section>`;
+      <section>
+        <div class="login-container">
+          <h2>Login</h2>
+          <form id="loginForm">
+            <div class="input-group">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+          </form>
+          <div id="loginMessage"></div>
+        </div>
+      </section>`;
 
-    // Selecting element from the dom
     const loginForm = document.getElementById("loginForm");
     const loginMessage = document.getElementById("loginMessage");
 
+    // Add event listener to handle form submission
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
-      // Performing validation
+      // Simple validation check for login credentials
       if (username === "admin" && password === "password") {
         isLoggedIn = true;
         renderLoggedIn(); // Switch to "LoggedIn" state
       } else {
-        loginMessage.innerText = "Invalid username or password";
+        loginMessage.innerText = "Invalid username or password"; // Show error message
       }
     });
   }
-  // Function executing after logging in
+
+  // Function to render the logged-in state with weather information
   function renderLoggedIn() {
     main.innerHTML = `
-    <div id="weather-container">
+      <div id="weather-container">
         <table>
           <tr>
             <th>City</th>
@@ -54,11 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
             <th>Description</th>
           </tr>
         </table>
-    </div>
-    `; // Initialize weather container
+      </div>`;
 
-    // API Key
-    const apiKey = "8d6b39a3d3f4fd90b2e0324e263720d9";
+    const apiKey = "8d6b39a3d3f4fd90b2e0324e263720d9"; // OpenWeatherMap API key
     const cities = [
       { name: "London", lat: 51.5074, lon: -0.1278 },
       { name: "New York", lat: 40.7128, lon: -74.006 },
@@ -76,16 +75,17 @@ document.addEventListener("DOMContentLoaded", function () {
       { name: "Seoul", lat: 37.5665, lon: 126.978 },
       { name: "Shanghai", lat: 31.2304, lon: 121.4737 },
     ];
-    const delay = 10000; // 10 seconds
 
-    // Using ajax for fetching information
+    const delay = 10000; // 10 seconds delay for fetching data
+
+    // Function to fetch weather data using AJAX
     function getWeatherData(city, lat, lon, delay) {
       setTimeout(() => {
         $.ajax({
           url: `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`,
           method: "GET",
           success: function (data) {
-            displayWeatherData(data);
+            displayWeatherData(data); // Display the fetched weather data
           },
           error: function (error) {
             console.error("Error fetching weather data:", error);
@@ -94,28 +94,28 @@ document.addEventListener("DOMContentLoaded", function () {
       }, delay);
     }
 
-    // Display data after fetching information
+    // Function to display the fetched weather data in the table
     function displayWeatherData(data) {
       const weatherContainer = $("#weather-container");
       const weatherInfo = `
-          <tr>
-            <td>${data.name}</td>
-            <td>${data.main.temp.toFixed(2)}</td>
-            <td>${data.weather[0].description}</td>
-          </tr>
-      `;
-      weatherContainer.append(weatherInfo);
+        <tr>
+          <td>${data.name}</td>
+          <td>${data.main.temp.toFixed(2)}</td>
+          <td>${data.weather[0].description}</td>
+        </tr>`;
+      weatherContainer.append(weatherInfo); // Append the weather data to the table
     }
 
+    // Iterate over the cities and fetch weather data with delay
     cities.forEach((city, index) => {
       getWeatherData(city.name, city.lat, city.lon, index * delay);
     });
   }
 
-  // Logic for checking if the user is loggedIn or not
+  // Check the login status and render the appropriate state
   if (!isLoggedIn) {
-    renderLoginForm();
+    renderLoginForm(); // Render login form if not logged in
   } else {
-    renderLoggedIn();
+    renderLoggedIn(); // Render logged-in state if already logged in
   }
 });
